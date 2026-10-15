@@ -1,0 +1,30 @@
+{
+	"name": "news",
+	"version": "1.0.0",
+	"description": "A website about news",
+	"main": "src/app.js",
+	"scripts": {
+		"dev": "nodemon app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/atimine/news.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs",
+	"bugs": {
+		"url": "https://github.com/atimine/news/issues"
+	},
+	"homepage": "https://github.com/atimine/news#readme",
+	"dependencies": {
+		"dotenv": "^18.0.8",
+		"express": "^5.3.0",
+		"mongoose": "^9.11.2",
+		"multer": "^2.4.0"
+	},
+	"devDependencies": {
+		"nodemon": "^1.14.10"
+	}
+}
