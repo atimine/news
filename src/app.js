@@ -20,9 +20,9 @@ app.get('/', (req, res) => {
 	res.status(200)
 	res.json({ message: 'Welcome to News API' })
 })
-app.use('/api/auth', authRouter)
 app.use('/api/news', newsRouter)
 app.use('/api/categories', categoriesRouter)
+app.use('/api/auth', authRouter)
 app.use('/api/tags', tagsRouter)
 app.use('/api/admin', adminRoute)
 

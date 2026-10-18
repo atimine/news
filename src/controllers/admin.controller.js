@@ -1,5 +1,7 @@
+const categoriesModel = require('../models/categories.model')
+const tagsModel = require('../models/tags.model')
 const usersModel = require('../models/users.model')
-
+const slugify = require('slugify')
 class AdminController {
 	async renderStatistics(req, res) {
 		res.json({ message: 'Welcome to Statistics' })
@@ -18,16 +20,6 @@ class AdminController {
 	}
 
 	async renderUsersList(req, res) {
-		const users = await usersModel.create({
-			_id: 1,
-			name: 'Adham Khudayberganov',
-			email: 'adham@example.com',
-			password: 'hashed_password_123',
-			role: 'ADMIN',
-			isBlocked: false,
-			blockReason: '',
-		})
-		console.log(users)
 		res.json({ message: 'Welcome to User List' })
 	}
 
@@ -43,28 +35,74 @@ class AdminController {
 		res.json({ message: 'Welcome to Unblock User' })
 	}
 
-	async createCategory() {
-		res.json({ message: 'Welcome to Create Category' })
+	async createCategory(req, res) {
+		const { name, description } = req.body
+		const slug = slugify(name).toLowerCase()
+
+		const createdCategory = await categoriesModel.create({
+			name,
+			slug,
+			description,
+		})
+		res.status(201).json(createdCategory)
 	}
 
-	async createTag() {
-		res.json({ message: 'Welcome to Create Tag' })
+	async updateCategory(req, res) {
+		const id = req.params.id
+		const { name, description } = req.body
+		const slug = slugify(name).toLowerCase()
+
+		const updatedCategory = await categoriesModel.findByIdAndUpdate(id, {
+			name,
+			slug,
+			description,
+		})
+		res.status(200).json(updatedCategory)
 	}
 
-	async updateCategory() {
-		res.json({ message: 'Welcome to Update Category' })
+	async deleteCategory(req, res) {
+		const id = req.params.id
+
+		const deletedCategory = await categoriesModel.findByIdAndDelete(id)
+
+		res.status(204).json({
+			message: 'Content Was Deleted Succesfully',
+			data: deletedCategory,
+		})
 	}
 
-	async updateTag() {
-		res.json({ message: 'Welcome to Update Tag' })
+	async createTag(req, res) {
+		const { name } = req.body
+		const slug = slugify(name).toLowerCase()
+
+		const createdTag = await tagsModel.create({
+			name,
+			slug,
+		})
+		res.status(201).json(createdTag)
 	}
 
-	async deleteCategory() {
-		res.json({ message: 'Welcome to Delete Category' })
+	async updateTag(req, res) {
+		const id = req.params.id
+		const { name } = req.body
+		const slug = slugify(name).toLowerCase()
+
+		const updatedTag = await tagsModel.findByIdAndUpdate(id, {
+			name,
+			slug,
+		})
+		res.status(200).json(updatedTag)
 	}
 
-	async deleteTag() {
-		res.json({ message: 'Welcome to Delete Tag' })
+	async deleteTag(req, res) {
+		const id = req.params.id
+
+		const deletedTag = await tagsModel.findByIdAndDelete(id)
+
+		res.status(204).json({
+			message: 'Content Was Deleted Succesfully',
+			data: deletedTag,
+		})
 	}
 }
 
