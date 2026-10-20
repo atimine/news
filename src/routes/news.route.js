@@ -15,6 +15,6 @@ router.post('/', newsController.createNews)
 router.patch('/:id', newsController.editNews)
 
 // DELETE REQUESTS
-router.delete('/:id', newsController.removeNews)
+router.delete('/:id', newsController.deleteNews)
 
 module.exports = router

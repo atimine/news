@@ -3,7 +3,6 @@ const authController = require('../controllers/auth.controller')
 const router = express.Router()
 
 // GET REQUESTS
-router.get('/', authController.renderNews)
 router.get('/me', authController.getCurrentUser)
 
 // POST REQUESTS

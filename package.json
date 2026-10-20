@@ -19,10 +19,16 @@
 	},
 	"homepage": "https://github.com/atimine/news#readme",
 	"dependencies": {
+		"bcrypt": "^6.0.0",
+		"cookie-parser": "^1.4.7",
 		"dotenv": "^18.0.8",
 		"express": "^5.3.0",
+		"file-type": "^22.2.0",
+		"joi": "^18.3.0",
+		"jsonwebtoken": "^9.0.3",
 		"mongoose": "^9.11.2",
 		"multer": "^2.4.0",
+		"sharp": "^0.35.5",
 		"slugify": "^1.6.9"
 	},
 	"devDependencies": {

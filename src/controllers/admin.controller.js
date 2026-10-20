@@ -97,7 +97,7 @@ class AdminController {
 	async deleteTag(req, res) {
 		const id = req.params.id
 
-		const deletedTag = await tagsModel.findByIdAndDelete(id)
+		const deletedTag = await tagsModel.findByIdAndDelete(id) //remove & delete
 
 		res.status(204).json({
 			message: 'Content Was Deleted Succesfully',

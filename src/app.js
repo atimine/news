@@ -7,6 +7,7 @@ const newsRouter = require('./routes/news.route')
 const categoriesRouter = require('./routes/categories.route')
 const tagsRouter = require('./routes/tags.route')
 const adminRoute = require('./routes/admin.route')
+const setDefaultAdmin = require('./seeds/admin.seed')
 const app = express()
 
 const PORT = process.env.PORT
@@ -32,6 +33,13 @@ connectionDB().then(() => {
 			console.log(err)
 		}
 
+		// Please provide admin privilages in the env file before running the application
+		setDefaultAdmin(
+			process.env.ADMIN_NAME,
+			process.env.ADMIN_EMAIL,
+			process.env.USER_ROLE,
+			process.env.ADMIN_PASSWORD,
+		)
 		console.log('Express App running on: ', PORT)
 	})
 })

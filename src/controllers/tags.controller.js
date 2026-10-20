@@ -1,6 +1,8 @@
+const tagsModel = require('../models/tags.model')
 class TagsController {
 	async renderTags(req, res) {
-		res.json({ message: 'Welcome to Auth' })
+		const tags = await tagsModel.find({})
+		res.status(200).json({ success: true, data: tags })
 	}
 }
 

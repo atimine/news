@@ -1,6 +1,9 @@
+const categoriesModel = require('../models/categories.model')
+
 class CategoriesController {
 	async renderCategories(req, res) {
-		res.json({ message: 'Welcome to Categories' })
+		const categories = await categoriesModel.find({})
+		res.status(200).json({ success: true, data: categories })
 	}
 }
 
