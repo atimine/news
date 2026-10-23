@@ -7,7 +7,7 @@ async function setDefaultAdmin(name, email, role, password) {
 	const defaultAdmin = await usersModel.findOne({ email, role })
 
 	if (!defaultAdmin) {
-		await usersModel.create({ name, email, password, role })
+		return await usersModel.create({ name, email, password, role })
 	}
 
 	console.log('Default Admin Is Active')

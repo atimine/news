@@ -11,7 +11,7 @@ class AdminController {
 		res.json({ message: 'Welcome to Admin News' })
 	}
 
-	async approveNews() {
+	async approveNews(req, res) {
 		res.json({ message: 'Welcome to Approve news' })
 	}
 

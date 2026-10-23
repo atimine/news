@@ -8,6 +8,7 @@ const categoriesRouter = require('./routes/categories.route')
 const tagsRouter = require('./routes/tags.route')
 const adminRoute = require('./routes/admin.route')
 const setDefaultAdmin = require('./seeds/admin.seed')
+const cookieParser = require('cookie-parser')
 const app = express()
 
 const PORT = process.env.PORT
@@ -15,6 +16,7 @@ const PORT = process.env.PORT
 // MIDDLEWARES
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
 
 // ROUTES
 app.get('/', (req, res) => {

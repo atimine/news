@@ -22,6 +22,10 @@ class NewsController {
 	async createNews(req, res) {
 		const { title, description, category, author, tags } = req.body
 
+		console.log(req.user)
+
+		console.log(req.cookies.jwt_refresh_token)
+
 		if (!title && !description && !category && !author && !tags) {
 			return res.status(400).json({
 				success: false,

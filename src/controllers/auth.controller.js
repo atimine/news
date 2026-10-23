@@ -1,5 +1,6 @@
 const usersModel = require('../models/users.model')
 const bcrypt = require('bcrypt')
+const { signAccessJwt, signRefreshJwt } = require('../utils/signJwt')
 class AuthController {
 	async register(req, res) {
 		let { name, email, password } = req.body
@@ -23,22 +24,40 @@ class AuthController {
 		const registeredUser = await usersModel.create({ name, email, password })
 		registeredUser.password = null
 
+		const token = signAccessJwt(registeredUser)
+
+		res.cookie('jwt_token', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: true,
+			maxAge: 900000,
+		})
+
 		res.status(201).json({ data: registeredUser })
 	}
 
 	async login(req, res) {
 		const { email, password } = req.body
-		const existUser = await usersModel.findOne({ email })
+		const existingUser = await usersModel.findOne({ email })
 
-		if (!existUser) {
+		if (!existingUser) {
 			return res.status(404).json({ message: 'Email Or Password is wrong' })
 		}
 
-		const checkedPass = await bcrypt.compare(password, existUser.password)
+		const checkedPass = await bcrypt.compare(password, existingUser.password)
 
 		if (!checkedPass) {
 			return res.status(404).json({ message: 'Email Or Password is wrong' })
 		}
+
+		const token = signRefreshJwt(existingUser)
+
+		res.cookie('jwt_refresh_token', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: true,
+			maxAge: 6.048e8,
+		})
 
 		return res.status(200).json({ message: 'Welcome to Login' })
 	}
