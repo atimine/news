@@ -8,23 +8,42 @@ class NewsController {
 	}
 
 	async searchNews(req, res) {
-		res.json({ message: 'Welcome to Searching news' })
+		const { q, category, tag, sort, page, limit } = req.query
+		const results = await newsModel
+			.find({
+				$text: {
+					$search: q,
+				},
+			})
+			.limit(limit || 10)
+			.sort({ createdAt: sort == 'newest' ? -1 : 1 })
+			.skip(page || 1)
+
+		console.log(req.query)
+
+		res.status(200).json({ success: true, data: results })
 	}
 
 	async getMyNews(req, res) {
-		res.json({ message: 'Welcome to My news' })
+		const id = req.user.userId
+		const newsOfUser = await newsModel.find({ author: id })
+
+		res.status(200).json({ success: true, data: newsOfUser })
 	}
 
 	async getOneNews(req, res) {
-		res.json({ message: 'Welcome to One news' })
+		const slug = req.params.slug
+
+		const oneNews = await newsModel.findOne({ slug })
+
+		if (!oneNews)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		res.status(200).json({ success: true, data: oneNews })
 	}
 
 	async createNews(req, res) {
 		const { title, description, category, author, tags } = req.body
-
-		console.log(req.user)
-
-		console.log(req.cookies.jwt_refresh_token)
 
 		if (!title && !description && !category && !author && !tags) {
 			return res.status(400).json({

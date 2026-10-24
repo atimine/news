@@ -6,8 +6,8 @@ const router = express.Router()
 // GET REQUESTS
 router.get('/', newsController.renderNews)
 router.get('/search', newsController.searchNews)
-router.get('/my', newsController.getMyNews)
-router.get(':slug', newsController.getOneNews)
+router.get('/my', authenticateToken, newsController.getMyNews)
+router.get('/:slug', newsController.getOneNews)
 
 // POST REQUEST
 router.post('/', authenticateToken, newsController.createNews)

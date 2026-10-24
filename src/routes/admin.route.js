@@ -1,10 +1,11 @@
 const express = require('express')
 const adminController = require('../controllers/admin.controller')
+const authenticateToken = require('../middlewares/authenticate.middleware')
 const router = express.Router()
 
 // GET REQUESTS
-router.get('/stats', adminController.renderStatistics)
-router.get('/news', adminController.renderNews)
+router.get('/stats', authenticateToken, adminController.renderStatistics)
+router.get('/news', authenticateToken, adminController.renderNews)
 router.get('/users', adminController.renderUsersList)
 router.get('/users/:id/news', adminController.renderUsersNews)
 

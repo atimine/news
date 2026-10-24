@@ -4,16 +4,20 @@ const authenticateToken = require('../middlewares/authenticate.middleware')
 const router = express.Router()
 
 // GET REQUESTS
-router.get('/me', authController.getCurrentUser)
+router.get('/me', authenticateToken, authController.getCurrentUser)
 
 // POST REQUESTS
 router.post('/register', authController.register)
 router.post('/login', authController.login)
-router.post('/logout', authController.logout)
+router.post('/logout', authenticateToken, authController.logout)
 router.post('/refresh', authController.refreshCookie)
 
 // PATCH REQUESTS
-router.patch('/me', authController.editProfile)
-router.patch('/change-password', authController.changePassword)
+router.patch('/me', authenticateToken, authController.editProfile)
+router.patch(
+	'/change-password',
+	authenticateToken,
+	authController.changePassword,
+)
 
 module.exports = router

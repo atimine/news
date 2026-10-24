@@ -1,4 +1,5 @@
 const categoriesModel = require('../models/categories.model')
+const newsModel = require('../models/news.model')
 const tagsModel = require('../models/tags.model')
 const usersModel = require('../models/users.model')
 const slugify = require('slugify')
@@ -8,7 +9,8 @@ class AdminController {
 	}
 
 	async renderNews(req, res) {
-		res.json({ message: 'Welcome to Admin News' })
+		const news = await newsModel.find({})
+		res.json({ success: true, data: news })
 	}
 
 	async approveNews(req, res) {

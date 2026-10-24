@@ -28,7 +28,12 @@ const News = new Schema(
 		reviewdBy: { type: mongoose.Types.ObjectId, ref: 'Users' },
 		publishedAt: { type: Date },
 	},
-	{ timestamps: true },
+	{ timestamps: true, autoSearchIndex: true },
 )
+
+News.index({
+	title: 'text',
+	content: 'text',
+})
 
 module.exports = new mongoose.model('News', News)

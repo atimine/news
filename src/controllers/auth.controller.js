@@ -63,11 +63,17 @@ class AuthController {
 	}
 
 	logout(req, res) {
-		res.json({ message: 'Welcome to Logout' })
+		if (!req.cookies.jwt_refresh_token)
+			return res
+				.status(200)
+				.json({ success: true, message: 'You Already Loged out' })
+
+		res.clearCookie('jwt_refresh_token')
+		res.status(200).json({ message: 'You Loged out' })
 	}
 
-	getCurrentUser(req, res) {
-		res.json({ message: 'Welcome to Current User' })
+	async getCurrentUser(req, res) {
+		res.json({ success: true, data: req.user })
 	}
 
 	refreshCookie(req, res) {
@@ -75,22 +81,45 @@ class AuthController {
 	}
 
 	async editProfile(req, res) {
-		const { name, email, password } = req.body
+		let { name, email, password } = req.body
+		const currentUser = req.user
+		password = await bcrypt.hash(password, 12)
+
 		const updatedUser = await usersModel.findOneAndUpdate(
+			{ _id: currentUser.userId },
 			{
+				name,
 				email,
 				password,
 			},
-			{ name, email, password },
 		)
 
-		console.log(updatedUser)
+		const token = signRefreshJwt(updatedUser)
 
-		res.status(200).json({ message: 'Welcome to Edit Profile' })
+		res.cookie('jwt_refresh_token', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: true,
+			maxAge: 6.048e8,
+		})
+
+		res
+			.status(200)
+			.json({ success: true, message: 'Profile Was Updated Successfully' })
 	}
 
-	changePassword(req, res) {
-		res.json({ message: 'Welcome to Change Password' })
+	async changePassword(req, res) {
+		let { password } = req.body
+		const id = req.user.userId
+		password = await bcrypt.hash(password, 12)
+
+		await usersModel
+			.findByIdAndUpdate({ _id: id }, { password })
+			.select('-password')
+
+		res
+			.status(200)
+			.json({ success: true, message: 'Password Was Updated Successfully' })
 	}
 }
 

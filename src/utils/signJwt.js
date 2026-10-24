@@ -4,6 +4,7 @@ function signAccessJwt(user) {
 	const access_token = jwt.sign(
 		{
 			userId: user.id,
+			userName: user.name,
 			userEmail: user.email,
 			role: user.role,
 			tokenVersion: user.tokenVersion,
@@ -19,6 +20,7 @@ function signRefreshJwt(user) {
 	const refresh_token = jwt.sign(
 		{
 			userId: user.id,
+			userName: user.name,
 			userEmail: user.email,
 			role: user.role,
 			tokenVersion: user.tokenVersion,
