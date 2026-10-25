@@ -3,7 +3,7 @@ const slugify = require('slugify')
 
 class NewsController {
 	async renderNews(req, res) {
-		const news = await newsModel.find({})
+		const news = await newsModel.find({ status: 'PUBLISHED' })
 		res.status(200).json({ success: true, data: news })
 	}
 
@@ -43,7 +43,7 @@ class NewsController {
 	}
 
 	async createNews(req, res) {
-		const { title, description, category, author, tags } = req.body
+		const { title, description, category, author, tags, images } = req.body
 
 		if (!title && !description && !category && !author && !tags) {
 			return res.status(400).json({
@@ -67,6 +67,7 @@ class NewsController {
 			category,
 			author,
 			tags,
+			images,
 		})
 
 		res.status(201).json({ success: true, data: news })

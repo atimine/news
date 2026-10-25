@@ -1,11 +1,10 @@
 const express = require('express')
 const adminController = require('../controllers/admin.controller')
-const authenticateToken = require('../middlewares/authenticate.middleware')
 const router = express.Router()
 
 // GET REQUESTS
-router.get('/stats', authenticateToken, adminController.renderStatistics)
-router.get('/news', authenticateToken, adminController.renderNews)
+router.get('/stats', adminController.renderStatistics)
+router.get('/news', adminController.renderNews)
 router.get('/users', adminController.renderUsersList)
 router.get('/users/:id/news', adminController.renderUsersNews)
 
@@ -14,8 +13,8 @@ router.post('/categories', adminController.createCategory)
 router.post('/tags', adminController.createTag)
 
 // PATCH REQUESTS
-router.patch('/news/:id/approve', adminController.renderNews)
-router.patch('/news/:id/approve', adminController.renderNews)
+router.patch('/news/:id/approve', adminController.approveNews)
+router.patch('/news/:id/reject', adminController.rejectNews)
 router.patch('/users/:id/block', adminController.blockUser)
 router.patch('/users/:id/unblock', adminController.unblockUser)
 router.patch('/categories/:id', adminController.updateCategory)

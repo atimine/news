@@ -14,11 +14,35 @@ class AdminController {
 	}
 
 	async approveNews(req, res) {
-		res.json({ message: 'Welcome to Approve news' })
+		const id = req.params.id
+
+		const approvedNews = await newsModel.findByIdAndUpdate(
+			{ _id: id },
+			{ status: 'PUBLISHED' },
+		)
+
+		if (!approvedNews)
+			return res.status(404).json({
+				success: false,
+				message: 'News Not Found or Your News Rejected',
+			})
+
+		res.status(200).json({ success: true, message: 'Welcome to Approve news' })
 	}
 
-	async rejectNews() {
-		res.json({ message: 'Welcome to Reject news' })
+	async rejectNews(req, res) {
+		const id = req.params.id
+		const { rejectReason } = req.body
+
+		const rejectedNews = await newsModel.findByIdAndUpdate(
+			{ _id: id, status: 'PENDING' },
+			{ status: 'REJECTED', rejectReason },
+		)
+
+		if (!rejectedNews)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		res.status(200).json({ success: true, message: 'Welcome to Rejected news' })
 	}
 
 	async renderUsersList(req, res) {
