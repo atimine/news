@@ -121,6 +121,21 @@ class AuthController {
 			.status(200)
 			.json({ success: true, message: 'Password Was Updated Successfully' })
 	}
+
+	async updatePassword(req, res) {
+		let { email, password } = req.body
+		password = await bcrypt.hash(password, 12)
+
+		const existingUser = await usersModel.find({ email })
+
+		if (!existingUser.length)
+			return res.status(404).json({ success: false, message: 'User Not Found' })
+
+		const result = await usersModel
+			.updateOne({ email }, { password })
+			.select('-password')
+		res.status(200).json({ success: true, message: result })
+	}
 }
 
 module.exports = new AuthController()

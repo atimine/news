@@ -19,5 +19,6 @@ router.patch(
 	authenticateToken,
 	authController.changePassword,
 )
+router.patch('/forget-password', authController.updatePassword)
 
 module.exports = router

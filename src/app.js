@@ -10,6 +10,7 @@ const adminRoute = require('./routes/admin.route')
 const setDefaultAdmin = require('./seeds/admin.seed')
 const cookieParser = require('cookie-parser')
 const authenticateToken = require('./middlewares/authenticate.middleware')
+const { customAlphabet } = require('nanoid')
 const app = express()
 
 const PORT = process.env.PORT

@@ -1,5 +1,6 @@
 const express = require('express')
 const adminController = require('../controllers/admin.controller')
+const newsController = require('../controllers/news.controller')
 const router = express.Router()
 
 // GET REQUESTS
@@ -10,6 +11,7 @@ router.get('/users/:id/news', adminController.renderUsersNews)
 
 // POST REQUESTS
 router.post('/categories', adminController.createCategory)
+router.post('/news', newsController.createNews)
 router.post('/tags', adminController.createTag)
 
 // PATCH REQUESTS

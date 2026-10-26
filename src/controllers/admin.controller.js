@@ -24,7 +24,7 @@ class AdminController {
 		if (!approvedNews)
 			return res.status(404).json({
 				success: false,
-				message: 'News Not Found or Your News Rejected',
+				message: 'News Not Found',
 			})
 
 		res.status(200).json({ success: true, message: 'Welcome to Approve news' })
@@ -35,7 +35,7 @@ class AdminController {
 		const { rejectReason } = req.body
 
 		const rejectedNews = await newsModel.findByIdAndUpdate(
-			{ _id: id, status: 'PENDING' },
+			{ _id: id },
 			{ status: 'REJECTED', rejectReason },
 		)
 

@@ -13,7 +13,7 @@ router.get('/:slug', newsController.getOneNews)
 router.post('/', authenticateToken, newsController.createNews)
 
 // PATCH REQUESTS
-router.patch('/:id', newsController.editNews)
+router.patch('/:id', authenticateToken, newsController.editNews)
 
 // DELETE REQUESTS
 router.delete('/:id', newsController.deleteNews)
