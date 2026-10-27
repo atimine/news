@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-// const Images = require('./images.model')
 const { Schema } = mongoose
 
 const Images = new Schema({

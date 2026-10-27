@@ -11,6 +11,7 @@ const setDefaultAdmin = require('./seeds/admin.seed')
 const cookieParser = require('cookie-parser')
 const authenticateToken = require('./middlewares/authenticate.middleware')
 const { customAlphabet } = require('nanoid')
+const authorize = require('./middlewares/authorize.middleware')
 const app = express()
 
 const PORT = process.env.PORT
@@ -29,7 +30,7 @@ app.use('/api/news', newsRouter)
 app.use('/api/categories', categoriesRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/tags', tagsRouter)
-app.use('/api/admin', authenticateToken, adminRoute)
+app.use('/api/admin', authenticateToken, authorize, adminRoute)
 
 connectionDB().then(() => {
 	app.listen(PORT, err => {

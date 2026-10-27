@@ -1,6 +1,7 @@
 const { customAlphabet } = require('nanoid')
 const newsModel = require('../models/news.model')
 const slugify = require('slugify')
+const bodySchema = require('../validators/body.validator')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -46,16 +47,16 @@ class NewsController {
 	}
 
 	async createNews(req, res) {
-		const { title, description, category, author, tags, images } = req.body
+		const { error, value } = bodySchema.validate({ ...req.body })
 
-		if (!title && !description && !category && !author && !tags) {
+		if (error) {
 			return res.status(400).json({
 				success: false,
-				message: 'Validation error',
+				message: error.message,
 				errors: [
 					{
-						fields: [title, description, category, author, tags],
-						message: 'Fields are wrong',
+						fields: { ...req.body },
+						message: error.message,
 					},
 				],
 			})
@@ -63,44 +64,43 @@ class NewsController {
 
 		let slug = slugify(title).toLowerCase()
 
-		let result = await newsModel.find({ slug })
+		// let result = await newsModel.find({ slug })
 
-		if (result.length) {
-			slug += `-${nanoid()}`
-		}
-		console.log(slug)
+		// if (result.length) {
+		// 	slug += `-${nanoid()}`
+		// }
 
-		if (req.user.role === 'ADMIN') {
-			const news = await newsModel.create({
-				title,
-				description,
-				slug,
-				category,
-				author,
-				tags,
-				images,
-				status: 'PUBLISHED',
-			})
+		// if (req.user.role === 'ADMIN') {
+		// 	const news = await newsModel.create({
+		// 		title,
+		// 		description,
+		// 		slug,
+		// 		category,
+		// 		author,
+		// 		tags,
+		// 		images,
+		// 		status: 'PUBLISHED',
+		// 	})
 
-			return res.status(201).json({ success: true, data: news })
-		}
+		// 	return res.status(201).json({ success: true, data: news })
+		// }
 
-		const news = await newsModel.create({
-			title,
-			description,
-			slug,
-			category,
-			author,
-			tags,
-			images,
-		})
+		// const news = await newsModel.create({
+		// 	title,
+		// 	description,
+		// 	slug,
+		// 	category,
+		// 	author,
+		// 	tags,
+		// 	images,
+		// })
 
-		res.status(201).json({ success: true, data: news })
+		res.status(201).json({ success: true, data: value })
 	}
 
 	async editNews(req, res) {
 		const id = req.params.id
-		const { title, description, category, author, tags, images } = req.body
+		const { title, description, category, tags, images } = req.body
 
 		let existingNews = await newsModel.findById({ _id: id })
 
@@ -120,23 +120,13 @@ class NewsController {
 			})
 		}
 
-		let slug = slugify(title).toLowerCase()
-
-		let result = await newsModel.find({ slug })
-
-		if (result.length) {
-			slug += `-${nanoid()}`
-		}
-
 		if (req.user.role === 'ADMIN') {
 			const news = await newsModel.findByIdAndUpdate(
 				{ _id: id },
 				{
 					title,
 					description,
-					slug,
 					category,
-					author,
 					tags,
 					images,
 				},
@@ -150,16 +140,14 @@ class NewsController {
 			{
 				title,
 				description,
-				slug,
 				category,
-				author,
 				tags,
 				images,
 				status: 'PENDING',
 			},
 		)
 
-		res.status(201).json({ success: true, data: existingNews })
+		res.status(200).json({ success: true, data: existingNews })
 	}
 
 	async deleteNews(req, res) {

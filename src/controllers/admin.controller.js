@@ -1,7 +1,6 @@
 const categoriesModel = require('../models/categories.model')
 const newsModel = require('../models/news.model')
 const tagsModel = require('../models/tags.model')
-const usersModel = require('../models/users.model')
 const slugify = require('slugify')
 class AdminController {
 	async renderStatistics(req, res) {

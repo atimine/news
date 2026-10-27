@@ -10,7 +10,7 @@ router.get('/me', authenticateToken, authController.getCurrentUser)
 router.post('/register', authController.register)
 router.post('/login', authController.login)
 router.post('/logout', authenticateToken, authController.logout)
-router.post('/refresh', authController.refreshCookie)
+router.post('/refresh', authController.refreshAccessToken)
 
 // PATCH REQUESTS
 router.patch('/me', authenticateToken, authController.editProfile)

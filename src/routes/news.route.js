@@ -1,6 +1,7 @@
 const express = require('express')
 const newsController = require('../controllers/news.controller')
 const authenticateToken = require('../middlewares/authenticate.middleware')
+const isOwnerOrAdmin = require('../middlewares/isOwnerOrAdmin.middleware')
 const router = express.Router()
 
 // GET REQUESTS
@@ -13,7 +14,7 @@ router.get('/:slug', newsController.getOneNews)
 router.post('/', authenticateToken, newsController.createNews)
 
 // PATCH REQUESTS
-router.patch('/:id', authenticateToken, newsController.editNews)
+router.patch('/:id', authenticateToken, isOwnerOrAdmin, newsController.editNews)
 
 // DELETE REQUESTS
 router.delete('/:id', newsController.deleteNews)

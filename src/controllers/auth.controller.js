@@ -73,10 +73,10 @@ class AuthController {
 	}
 
 	async getCurrentUser(req, res) {
-		res.json({ success: true, data: req.user })
+		res.status(200).json({ success: true, data: req.user })
 	}
 
-	refreshCookie(req, res) {
+	refreshAccessToken(req, res) {
 		res.json({ message: 'Welcome to Refresh Cookie' })
 	}
 

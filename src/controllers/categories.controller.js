@@ -1,8 +1,8 @@
-const categoriesModel = require('../models/categories.model')
+const categoriesService = require('../services/categories.service')
 
 class CategoriesController {
 	async renderCategories(req, res) {
-		const categories = await categoriesModel.find({})
+		const categories = await categoriesService.returnCategories()
 		res.status(200).json({ success: true, data: categories })
 	}
 }
