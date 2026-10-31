@@ -1,7 +1,7 @@
 const { customAlphabet } = require('nanoid')
 const newsModel = require('../models/news.model')
 const slugify = require('slugify')
-const bodySchema = require('../validators/body.validator')
+const createNewsSchema = require('../validators/body.validator')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -38,7 +38,9 @@ class NewsController {
 	async getOneNews(req, res) {
 		const slug = req.params.slug
 
-		const oneNews = await newsModel.findOne({ slug, status: 'PUBLISHED' })
+		const oneNews = await newsModel
+			.findOne({ slug, status: 'PUBLISHED' })
+			.populate(['category', 'author', 'tags'])
 
 		if (!oneNews)
 			return res.status(404).json({ success: false, message: 'News Not Found' })
@@ -47,7 +49,7 @@ class NewsController {
 	}
 
 	async createNews(req, res) {
-		const { error, value } = bodySchema.validate({ ...req.body })
+		const { error, value } = createNewsSchema.validate({ ...req.body })
 
 		if (error) {
 			return res.status(400).json({

@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const bodySchema = Joi.object({
+const createNewsSchema = Joi.object({
 	title: Joi.string()
 		.min(5)
 		.max(200)
@@ -23,4 +23,4 @@ const bodySchema = Joi.object({
 	rejectReason: Joi.string().min(3).max(300),
 }).with('title', 'description')
 
-module.exports = bodySchema
+module.exports = createNewsSchema

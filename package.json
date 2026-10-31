@@ -4,7 +4,8 @@
 	"description": "A website about news",
 	"main": "src/app.js",
 	"scripts": {
-		"dev": "nodemon app.js"
+		"dev": "nodemon app.js",
+		"seed": "node src/seeds/admin.seed.js"
 	},
 	"repository": {
 		"type": "git",

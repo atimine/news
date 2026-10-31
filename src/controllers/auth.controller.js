@@ -14,8 +14,7 @@ class AuthController {
 				message: 'Validation Error',
 				errors: [
 					{
-						field: 'email',
-						message: 'Email is taken. Please choose another one',
+						message: 'There is an error. Please try with different fields',
 					},
 				],
 			})

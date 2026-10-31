@@ -17,6 +17,11 @@ router.post('/', authenticateToken, newsController.createNews)
 router.patch('/:id', authenticateToken, isOwnerOrAdmin, newsController.editNews)
 
 // DELETE REQUESTS
-router.delete('/:id', newsController.deleteNews)
+router.delete(
+	'/:id',
+	authenticateToken,
+	isOwnerOrAdmin,
+	newsController.deleteNews,
+)
 
 module.exports = router
