@@ -55,9 +55,18 @@ class NewsController {
 
 	async createNews(req, res) {
 		// check tags and categories existing in the db!!!
-		const { error, value } = createNewsSchema.validate({ ...req.body })
+		const { error, value } = creatingNewsSchema.validate({ ...req.body })
+		let infoOfFiles = []
 
-		console.log(req.file)
+		req.files.forEach(file => {
+			const { path, filename, mimetype, size } = file
+			infoOfFiles.push({
+				url: `/uploads/${filename}`,
+				filename,
+				mimetype,
+				size,
+			})
+		})
 
 		if (error) {
 			return res.status(400).json({
@@ -84,6 +93,7 @@ class NewsController {
 			const news = await newsModel.create({
 				...value,
 				slug,
+				images: infoOfFiles,
 				status: 'PUBLISHED',
 				author: req.user.userId,
 			})
@@ -94,6 +104,7 @@ class NewsController {
 		const news = await newsModel.create({
 			...value,
 			slug,
+			images: infoOfFiles,
 			author: req.user.userId,
 		})
 

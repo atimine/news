@@ -34,7 +34,7 @@ function uploadMiddleware(req, res, next) {
 		},
 	})
 
-	const upload = multer({ storage, fileFilter, limits })
+	const upload = multer({ storage, fileFilter })
 	return upload.array('images')(req, res, next)
 }
 

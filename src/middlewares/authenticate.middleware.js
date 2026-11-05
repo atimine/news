@@ -8,6 +8,7 @@ function authenticateToken(req, res, next) {
 		next()
 	} catch {
 		return res.status(401).json({
+			success: false,
 			message: 'Invalid or expired token',
 		})
 	}

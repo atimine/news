@@ -41,15 +41,13 @@ class AuthController {
 		const { email, password } = req.body
 		const existingUser = await usersModel.findOne({ email })
 
-		if (!existingUser) {
-			return res.status(404).json({ message: 'Email Or Password is wrong' })
-		}
+		const checkedPass = await bcrypt.compare(
+			password,
+			existingUser?.password ?? '',
+		)
 
-		const checkedPass = await bcrypt.compare(password, existingUser.password)
-
-		if (!checkedPass) {
+		if (!checkedPass || !existingUser)
 			return res.status(404).json({ message: 'Email Or Password is wrong' })
-		}
 
 		const token = signRefreshJwt(existingUser)
 
@@ -73,7 +71,7 @@ class AuthController {
 		res.status(200).json({ message: 'You Loged out' })
 	}
 
-	async getCurrentUser(req, res) {
+	getCurrentUser(req, res) {
 		res.status(200).json({ success: true, data: req.user })
 	}
 
@@ -113,14 +111,18 @@ class AuthController {
 	}
 
 	async editProfile(req, res) {
-		let { name, email, password } = req.body
-		const currentUser = req.user
+		let { email, password } = req.body
 		password = await bcrypt.hash(password, 12)
 
-		//check existing email and user's email if its not changed
+		const existingUser = await usersModel.find({ email }).select('-password')
+
+		if (existingUser.length)
+			return res
+				.status(409)
+				.json({ success: false, message: 'Email already taken!' })
 
 		const updatedUser = await usersModel.findOneAndUpdate(
-			{ _id: currentUser.userId },
+			{ _id: req.user.userId },
 			{
 				...req.body,
 				password,
