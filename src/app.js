@@ -13,14 +13,16 @@ const cookieParser = require('cookie-parser')
 const authenticateToken = require('./middlewares/authenticate.middleware')
 const authorize = require('./middlewares/authorize.middleware')
 const { connectDatabase } = require('./config/db')
+const path = require('path')
 const app = express()
 
 const PORT = process.env.PORT
 
 // MIDDLEWARES
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // ROUTES
 app.get('/', (req, res) => {
