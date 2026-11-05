@@ -1,6 +1,8 @@
 const usersModel = require('../models/users.model')
 const bcrypt = require('bcrypt')
 const { signAccessJwt, signRefreshJwt } = require('../utils/signJwt')
+const jwt = require('jsonwebtoken')
+
 class AuthController {
 	async register(req, res) {
 		let { name, email, password } = req.body
@@ -25,7 +27,7 @@ class AuthController {
 
 		const token = signAccessJwt(registeredUser)
 
-		res.cookie('jwt_token', token, {
+		res.cookie('jwt_access_token', token, {
 			httpOnly: true,
 			secure: true,
 			sameSite: true,
@@ -75,8 +77,39 @@ class AuthController {
 		res.status(200).json({ success: true, data: req.user })
 	}
 
-	refreshAccessToken(req, res) {
-		res.json({ message: 'Welcome to Refresh Cookie' })
+	async refreshAccessToken(req, res) {
+		const accessToken = req.cookies.jwt_access_token
+
+		// console.log(req.cookies)
+		console.log(accessToken)
+
+		if (!accessToken)
+			return res
+				.status(500)
+				.json({ success: false, message: "Can't find access token" })
+
+		const userData = jwt.decode(accessToken)
+
+		console.log(userData)
+
+		const existingUser = await usersModel.findById({ _id: userData.userId })
+
+		if (!existingUser.length)
+			return res.status(404).json({ success: false, message: 'User Not Found' })
+
+		const token = signRefreshJwt(existingUser)
+
+		res.cookie('jwt_refresh_token', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: true,
+			maxAge: 6.048e8,
+		})
+
+		res.status(200).json({
+			success: true,
+			message: 'Access Token Was Refreshed Successfully',
+		})
 	}
 
 	async editProfile(req, res) {

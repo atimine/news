@@ -5,7 +5,7 @@ async function checkBlocked(req, res, next) {
 
 	const user = await usersModel.find({ email }).select('-password')
 
-	if (user[0].isBlocked)
+	if (user.isBlocked)
 		return res.status(403).json({
 			success: false,
 			message: 'You Are Blocked!',

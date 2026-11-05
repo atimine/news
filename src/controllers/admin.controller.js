@@ -64,11 +64,24 @@ class AdminController {
 	}
 
 	async renderUsersList(req, res) {
-		res.json({ message: 'Welcome to User List' })
+		const users = await usersModel.find({})
+
+		if (!users.length)
+			return res
+				.status(404)
+				.json({ success: false, message: 'Users Not Found' })
+
+		res.status(200).json({ success: true, data: users })
 	}
 
-	async renderUsersNews() {
-		res.json({ message: 'Welcome to User List' })
+	async renderUsersNews(req, res) {
+		const id = req.params.id
+		const news = await newsModel.find({ author: id })
+
+		if (!news.length)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		res.status(200).json({ success: true, data: news })
 	}
 
 	async blockUser(req, res) {
@@ -96,35 +109,43 @@ class AdminController {
 
 		await usersModel.findByIdAndUpdate(
 			{ _id: req.params.id },
-			{ isBlocked: false },
+			{ isBlocked: false, $unset: { blockReason: true } },
 		)
 
 		res.status(200).json({ success: true, message: 'User Was Unblocked' })
 	}
 
 	async createCategory(req, res) {
-		const { name, description } = req.body
-		const slug = slugify(name).toLowerCase()
+		const { name } = req.body
+		let slug = slugify(name).toLowerCase()
 
-		const createdCategory = await categoriesModel.create({
-			name,
-			slug,
-			description,
-		})
-		res.status(201).json(createdCategory)
+		let result = await newsModel.find({ slug })
+
+		if (result.length) {
+			slug += `-${nanoid()}`
+		}
+
+		await categoriesModel.create({ ...req.body, slug })
+
+		res
+			.status(201)
+			.json({ success: true, message: 'Category Was Created Successfully' })
 	}
 
 	async updateCategory(req, res) {
 		const id = req.params.id
-		const { name, description } = req.body
-		const slug = slugify(name).toLowerCase()
+		const { name } = req.body
 
 		const updatedCategory = await categoriesModel.findByIdAndUpdate(id, {
-			name,
-			slug,
-			description,
+			...req.body,
 		})
-		res.status(200).json(updatedCategory)
+
+		if (!updatedCategory)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		res
+			.status(200)
+			.json({ success: true, message: 'News Was Updated Successfully' })
 	}
 
 	async deleteCategory(req, res) {
@@ -132,9 +153,12 @@ class AdminController {
 
 		const deletedCategory = await categoriesModel.findByIdAndDelete(id)
 
+		if (!deletedCategory)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
 		res.status(204).json({
+			success: true,
 			message: 'Content Was Deleted Succesfully',
-			data: deletedCategory,
 		})
 	}
 
@@ -142,33 +166,54 @@ class AdminController {
 		const { name } = req.body
 		const slug = slugify(name).toLowerCase()
 
-		const createdTag = await tagsModel.create({
-			name,
-			slug,
+		let result = await newsModel.find({ name })
+
+		if (result.length)
+			return res
+				.status(400)
+				.json({ success: false, message: 'Tag Already Available' })
+
+		await tagsModel.create({ name, slug })
+
+		res.status(201).json({
+			success: true,
+			message: 'Tag Was Created Succesfully',
 		})
-		res.status(201).json(createdTag)
 	}
 
 	async updateTag(req, res) {
 		const id = req.params.id
 		const { name } = req.body
-		const slug = slugify(name).toLowerCase()
 
-		const updatedTag = await tagsModel.findByIdAndUpdate(id, {
-			name,
-			slug,
+		const updatedTag = await tagsModel.findByIdAndUpdate(id, { name })
+
+		if (!updatedTag)
+			return res.status(404).json({ success: false, message: 'Tag Not Found' })
+
+		res.status(200).json({
+			success: true,
+			message: 'Content Was Updated Succesfully',
 		})
-		res.status(200).json(updatedTag)
 	}
 
 	async deleteTag(req, res) {
 		const id = req.params.id
 
-		const deletedTag = await tagsModel.findByIdAndDelete(id) //remove & delete
+		// const deletedTag = await tagsModel.findByIdAndDelete(id)
+
+		// if (!deletedTag)
+		// 	return res.status(404).json({ success: false, message: 'Tag Not Found' })
+
+		const result = await newsModel.updateMany(
+			{ tags: id },
+			{ $pull: { tags: id } },
+		)
+
+		console.log(result)
 
 		res.status(204).json({
+			success: true,
 			message: 'Content Was Deleted Succesfully',
-			data: deletedTag,
 		})
 	}
 }

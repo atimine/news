@@ -5,7 +5,7 @@ const router = express.Router()
 const authorize = require('../middlewares/authorize.middleware')
 
 // GET REQUESTS
-router.get('/stats', authorize, adminController.renderStatistics)
+router.get('/stats', adminController.renderStatistics)
 router.get('/news', adminController.renderNews)
 router.get('/users', adminController.renderUsersList)
 router.get('/users/:id/news', adminController.renderUsersNews)

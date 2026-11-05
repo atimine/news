@@ -39,17 +39,25 @@ class NewsController {
 		const slug = req.params.slug
 
 		const oneNews = await newsModel
-			.findOne({ slug, status: 'PUBLISHED' })
-			.populate(['category', 'author', 'tags'])
+			.findOne({ slug })
+			.populate(['category', 'tags'])
 
 		if (!oneNews)
-			return res.status(404).json({ success: false, message: 'News Not Found' })
+			return res.status(404).json({ sucess: false, message: 'Not Found' })
+
+		if (['PENDING', 'REJECTED'].includes(oneNews.status))
+			return res
+				.status(403)
+				.json({ sucess: false, message: 'This News Is Not Allowed' })
 
 		res.status(200).json({ success: true, data: oneNews })
 	}
 
 	async createNews(req, res) {
+		// check tags and categories existing in the db!!!
 		const { error, value } = createNewsSchema.validate({ ...req.body })
+
+		console.log(req.file)
 
 		if (error) {
 			return res.status(400).json({
@@ -64,7 +72,7 @@ class NewsController {
 			})
 		}
 
-		let slug = slugify(title).toLowerCase()
+		// let slug = slugify(title).toLowerCase()
 
 		// let result = await newsModel.find({ slug })
 
@@ -156,10 +164,6 @@ class NewsController {
 		const id = req.params.id
 		const existingNews = await newsModel.findByIdAndDelete(id)
 		res.status(200).json({ success: true, data: existingNews })
-	}
-
-	changePassword(req, res) {
-		res.json({ message: 'Welcome to Change Password' })
 	}
 }
 

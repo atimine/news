@@ -32,7 +32,9 @@ const News = new Schema(
 			ref: 'Users',
 			required: true,
 		},
-		tags: { type: mongoose.Schema.Types.ObjectId, ref: 'Tags', required: true },
+		tags: [
+			{ type: mongoose.Schema.Types.ObjectId, ref: 'Tags', required: true },
+		],
 		status: {
 			type: String,
 			enum: ['PENDING', 'PUBLISHED', 'REJECTED'],
