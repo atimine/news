@@ -84,11 +84,12 @@ class AuthController {
 		const currentUser = req.user
 		password = await bcrypt.hash(password, 12)
 
+		//check existing email and user's email if its not changed
+
 		const updatedUser = await usersModel.findOneAndUpdate(
 			{ _id: currentUser.userId },
 			{
-				name,
-				email,
+				...req.body,
 				password,
 			},
 		)

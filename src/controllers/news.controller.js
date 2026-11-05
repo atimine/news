@@ -1,7 +1,7 @@
 const { customAlphabet } = require('nanoid')
 const newsModel = require('../models/news.model')
 const slugify = require('slugify')
-const createNewsSchema = require('../validators/body.validator')
+const creatingNewsSchema = require('../validators/body.validator')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -49,7 +49,7 @@ class NewsController {
 	}
 
 	async createNews(req, res) {
-		const { error, value } = createNewsSchema.validate({ ...req.body })
+		const { error, value } = creatingNewsSchema.validate({ ...req.body })
 
 		if (error) {
 			return res.status(400).json({
@@ -64,38 +64,30 @@ class NewsController {
 			})
 		}
 
-		let slug = slugify(title).toLowerCase()
+		let slug = slugify(value.title).toLowerCase()
 
-		// let result = await newsModel.find({ slug })
+		let result = await newsModel.find({ slug })
 
-		// if (result.length) {
-		// 	slug += `-${nanoid()}`
-		// }
+		if (result.length) {
+			slug += `-${nanoid()}`
+		}
 
-		// if (req.user.role === 'ADMIN') {
-		// 	const news = await newsModel.create({
-		// 		title,
-		// 		description,
-		// 		slug,
-		// 		category,
-		// 		author,
-		// 		tags,
-		// 		images,
-		// 		status: 'PUBLISHED',
-		// 	})
+		if (req.user.role === 'ADMIN') {
+			const news = await newsModel.create({
+				...value,
+				slug,
+				status: 'PUBLISHED',
+				author: req.user.userId,
+			})
 
-		// 	return res.status(201).json({ success: true, data: news })
-		// }
+			return res.status(201).json({ success: true, data: news })
+		}
 
-		// const news = await newsModel.create({
-		// 	title,
-		// 	description,
-		// 	slug,
-		// 	category,
-		// 	author,
-		// 	tags,
-		// 	images,
-		// })
+		const news = await newsModel.create({
+			...value,
+			slug,
+			author: req.user.userId,
+		})
 
 		res.status(201).json({ success: true, data: value })
 	}

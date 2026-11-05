@@ -5,7 +5,7 @@
 	"main": "src/app.js",
 	"scripts": {
 		"dev": "nodemon app.js",
-		"seed": "node src/seeds/admin.seed.js"
+		"seed:admin": "node src/seeds/admin.seed.js"
 	},
 	"repository": {
 		"type": "git",
