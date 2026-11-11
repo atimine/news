@@ -144,12 +144,27 @@ class AuthController {
 	}
 
 	async changePassword(req, res) {
-		let { password } = req.body
+		let { currentPassword, newPassword } = req.body
 		const id = req.user.userId
-		password = await bcrypt.hash(password, 12)
+
+		const existingUser = await usersModel
+			.findOne({ _id: id })
+			.select('password')
+
+		if (!existingUser)
+			return res.status(404).json({ success: false, message: 'User Not Fund' })
+
+		const result = await bcrypt.compare(currentPassword, existingUser.password)
+
+		if (!result)
+			return res
+				.status(400)
+				.json({ success: false, message: 'Current Password Is Wrong ' })
+
+		newPassword = await bcrypt.hash(newPassword, 12)
 
 		await usersModel
-			.findByIdAndUpdate({ _id: id }, { password })
+			.findByIdAndUpdate({ _id: id }, { password: newPassword })
 			.select('-password')
 
 		res

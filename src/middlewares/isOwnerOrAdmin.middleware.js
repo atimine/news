@@ -7,6 +7,8 @@ async function isOwnerOrAdmin(req, res, next) {
 	if (req.user.role === 'USER') {
 		news = await newsModel.findById({ _id: id })
 
+		if (!news) return next()
+
 		if (news.author.toString() !== req.user.userId)
 			return res.status(403).json({ success: false, message: 'Not Allowed' })
 

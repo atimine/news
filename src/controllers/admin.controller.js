@@ -151,10 +151,19 @@ class AdminController {
 	async deleteCategory(req, res) {
 		const id = req.params.id
 
+		// const existingCategory = await newsModel.findOne({ categry: id }) //objectid check in mongodb
+
+		// if (existingCategory.id === id)
+		// 	return res
+		// 		.status(409)
+		// 		.json({ success: false, message: 'This category cannot be deleted' })
+
 		const deletedCategory = await categoriesModel.findByIdAndDelete(id)
 
 		if (!deletedCategory)
-			return res.status(404).json({ success: false, message: 'News Not Found' })
+			return res
+				.status(404)
+				.json({ success: false, message: 'Category Not Found' })
 
 		res.status(204).json({
 			success: true,
@@ -164,13 +173,13 @@ class AdminController {
 
 	async createTag(req, res) {
 		const { name } = req.body
-		const slug = slugify(name).toLowerCase()
+		const slug = slugify(name).toLowerCase() // optimize the createing slug (check tags if already exist create different one)
 
-		let result = await newsModel.find({ name })
+		let result = await tagsModel.findOne({ name })
 
-		if (result.length)
+		if (result)
 			return res
-				.status(400)
+				.status(409)
 				.json({ success: false, message: 'Tag Already Available' })
 
 		await tagsModel.create({ name, slug })
@@ -199,17 +208,12 @@ class AdminController {
 	async deleteTag(req, res) {
 		const id = req.params.id
 
-		// const deletedTag = await tagsModel.findByIdAndDelete(id)
+		const deletedTag = await tagsModel.findByIdAndDelete(id)
 
-		// if (!deletedTag)
-		// 	return res.status(404).json({ success: false, message: 'Tag Not Found' })
+		if (!deletedTag)
+			return res.status(404).json({ success: false, message: 'Tag Not Found' })
 
-		const result = await newsModel.updateMany(
-			{ tags: id },
-			{ $pull: { tags: id } },
-		)
-
-		console.log(result)
+		await newsModel.updateMany({ tags: id }, { $pull: { tags: id } })
 
 		res.status(204).json({
 			success: true,
