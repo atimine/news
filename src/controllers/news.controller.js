@@ -1,7 +1,6 @@
 const { customAlphabet } = require('nanoid')
 const newsModel = require('../models/news.model')
 const slugify = require('slugify')
-const creatingNewsSchema = require('../validators/creatingNews.validator')
 const categoriesModel = require('../models/categories.model')
 const tagsModel = require('../models/tags.model')
 const fs = require('fs')
@@ -43,8 +42,6 @@ class NewsController {
 			.populate(['category', 'tags'])
 			.populate('author', 'name')
 
-		console.log(results)
-
 		res
 			.status(200)
 			.json({ success: true, data: results, meta: { total: results.length } })
@@ -81,7 +78,6 @@ class NewsController {
 
 	async createNews(req, res) {
 		// check tags and categories existing in the db!!!
-		const { error, value } = creatingNewsSchema.validateAsync({ ...req.body })
 		let infoOfFiles = []
 
 		req.files.forEach(file => {
@@ -94,21 +90,7 @@ class NewsController {
 			})
 		})
 
-		if (error) {
-			return res.status(400).json({
-				success: false,
-				message: error.message,
-				errors: [
-					{
-						fields: { ...req.body },
-						message: error.message,
-					},
-				],
-			})
-		}
-
-		let slug = slugify(value.title).toLowerCase()
-
+		let slug = slugify(req.body.title).toLowerCase()
 		let result = await newsModel.find({ slug })
 
 		if (result.length) {
@@ -117,7 +99,7 @@ class NewsController {
 
 		if (req.user.role === 'ADMIN') {
 			const news = await newsModel.create({
-				...value,
+				...req.body,
 				slug,
 				images: infoOfFiles,
 				status: 'PUBLISHED',
@@ -128,13 +110,13 @@ class NewsController {
 		}
 
 		const news = await newsModel.create({
-			...value,
+			...req.body,
 			slug,
 			images: infoOfFiles,
 			author: req.user.userId,
 		})
 
-		res.status(201).json({ success: true, data: value })
+		res.status(201).json({ success: true, data: news })
 	}
 
 	async editNews(req, res) {

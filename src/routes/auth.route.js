@@ -16,7 +16,7 @@ router.post(
 )
 router.post(
 	'/login',
-	// validateMiddleware.checkLogin,
+	validateMiddleware.checkLogin,
 	checkBlocked,
 	authController.login,
 )

@@ -16,8 +16,8 @@ router.get('/:slug', newsController.getOneNews)
 router.post(
 	'/',
 	authenticateToken,
-	validateMiddleware.checkCreatingNewsSchema,
 	uploadMiddleware,
+	validateMiddleware.checkCreatingNewsSchema,
 	newsController.createNews,
 )
 

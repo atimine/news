@@ -34,7 +34,7 @@ class AuthController {
 			maxAge: 900000,
 		})
 
-		res.status(201).json({ data: registeredUser })
+		res.status(201).json({ success: true, data: registeredUser })
 	}
 
 	async login(req, res) {
@@ -47,7 +47,9 @@ class AuthController {
 		)
 
 		if (!checkedPass || !existingUser)
-			return res.status(404).json({ message: 'Email Or Password is wrong' })
+			return res
+				.status(400)
+				.json({ success: false, message: 'Email Or Password is wrong' })
 
 		const token = signRefreshJwt(existingUser)
 
@@ -58,17 +60,14 @@ class AuthController {
 			maxAge: 6.048e8,
 		})
 
-		return res.status(200).json({ message: 'Welcome to Login' })
+		return res
+			.status(200)
+			.json({ success: true, message: 'You Logged In Successfullly' })
 	}
 
 	logout(req, res) {
-		if (!req.cookies.jwt_refresh_token)
-			return res
-				.status(200)
-				.json({ success: true, message: 'You Already Loged out' })
-
 		res.clearCookie('jwt_refresh_token')
-		res.status(200).json({ message: 'You Loged out' })
+		res.status(200).json({ success: true, message: 'You Logged out' })
 	}
 
 	getCurrentUser(req, res) {
@@ -78,17 +77,12 @@ class AuthController {
 	async refreshAccessToken(req, res) {
 		const accessToken = req.cookies.jwt_access_token
 
-		// console.log(req.cookies)
-		console.log(accessToken)
-
 		if (!accessToken)
 			return res
 				.status(500)
 				.json({ success: false, message: "Can't find access token" })
 
 		const userData = jwt.decode(accessToken)
-
-		console.log(userData)
 
 		const existingUser = await usersModel.findById({ _id: userData.userId })
 
@@ -114,12 +108,13 @@ class AuthController {
 		let { email, password } = req.body
 		password = await bcrypt.hash(password, 12)
 
-		const existingUser = await usersModel.find({ email }).select('-password')
+		const existingUser = await usersModel.findOne({ email }).select('-password')
 
-		if (existingUser.length)
-			return res
-				.status(409)
-				.json({ success: false, message: 'Email already taken!' })
+		if (existingUser)
+			if (existingUser.id !== req.user.userId)
+				return res
+					.status(409)
+					.json({ success: false, message: 'Email already taken!' })
 
 		const updatedUser = await usersModel.findOneAndUpdate(
 			{ _id: req.user.userId },

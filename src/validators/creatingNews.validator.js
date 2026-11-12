@@ -13,8 +13,9 @@ const updatingNewsSchema = Joi.object({
 	images: Joi.array().max(10),
 	category: Joi.string(),
 	tags: Joi.array()
-		.items(Joi.string().min(2).max(30).required())
+		.items(Joi.string())
 		.max(10)
+		.required()
 		.error(new Error('Tags Are Reqired')),
 }).with('title', 'description')
 
