@@ -15,7 +15,13 @@ router.get('/:slug', newsController.getOneNews)
 router.post('/', authenticateToken, uploadMiddleware, newsController.createNews)
 
 // PATCH REQUESTS
-router.patch('/:id', authenticateToken, isOwnerOrAdmin, newsController.editNews)
+router.patch(
+	'/:id',
+	authenticateToken,
+	isOwnerOrAdmin,
+	uploadMiddleware,
+	newsController.editNews,
+)
 
 // DELETE REQUESTS
 router.delete(

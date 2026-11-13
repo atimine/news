@@ -113,35 +113,47 @@ class NewsController {
 
 	async editNews(req, res) {
 		const id = req.params.id
-		const { title, description, category, tags, images } = req.body
+		const { error, value } = creatingNewsSchema.validate({ ...req.body })
+		let infoOfFiles = []
 
 		let existingNews = await newsModel.findById({ _id: id })
 
 		if (!existingNews)
 			return res.status(404).json({ success: false, message: 'News Not Found' })
 
-		if (!title && !description && !category && !author && !tags) {
+		if (error) {
 			return res.status(400).json({
 				success: false,
-				message: 'Validation error',
+				message: error.message,
 				errors: [
 					{
-						fields: [title, description, category, author, tags],
-						message: 'Fields are wrong',
+						fields: { ...req.body },
+						message: error.message,
 					},
 				],
 			})
+		}
+
+		if (req.files.length) {
+			req.files.forEach(file => {
+				const { path, filename, mimetype, size } = file
+				infoOfFiles.push({
+					url: `/uploads/${filename}`,
+					filename,
+					mimetype,
+					size,
+				})
+			})
+
+			value.images = infoOfFiles
 		}
 
 		if (req.user.role === 'ADMIN') {
 			const news = await newsModel.findByIdAndUpdate(
 				{ _id: id },
 				{
-					title,
-					description,
-					category,
-					tags,
-					images,
+					...value,
+					author: req.user.userId,
 				},
 			)
 
@@ -151,12 +163,9 @@ class NewsController {
 		existingNews = await newsModel.findByIdAndUpdate(
 			{ _id: id },
 			{
-				title,
-				description,
-				category,
-				tags,
-				images,
+				...value,
 				status: 'PENDING',
+				author: req.user.userId,
 			},
 		)
 
