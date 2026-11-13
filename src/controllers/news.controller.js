@@ -9,8 +9,25 @@ const path = require('path')
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
 	async renderNews(req, res) {
-		const news = await newsModel.find({ status: 'PUBLISHED' })
-		res.status(200).json({ success: true, data: news })
+		const { page, limit } = req.query
+
+		const news = await newsModel
+			.find({ status: 'PUBLISHED' })
+			.limit(limit || 10)
+			.skip(page || 0)
+			.populate(['category', 'tags'])
+			.populate('author', 'name')
+
+		res.status(200).json({
+			success: true,
+			data: news,
+			meta: {
+				page: page || 0,
+				limit: +limit || 10,
+				total: news.length,
+				totalPages: 0,
+			},
+		})
 	}
 
 	async searchNews(req, res) {
@@ -121,7 +138,6 @@ class NewsController {
 
 	async editNews(req, res) {
 		const id = req.params.id
-		const { error, value } = creatingNewsSchema.validate({ ...req.body })
 		let infoOfFiles = []
 
 		let existingNews = await newsModel.findById({ _id: id })
@@ -129,22 +145,9 @@ class NewsController {
 		if (!existingNews)
 			return res.status(404).json({ success: false, message: 'News Not Found' })
 
-		if (error) {
-			return res.status(400).json({
-				success: false,
-				message: error.message,
-				errors: [
-					{
-						fields: { ...req.body },
-						message: error.message,
-					},
-				],
-			})
-		}
-
-		if (req.files.length) {
+		if (req.files?.length || false) {
 			req.files.forEach(file => {
-				const { path, filename, mimetype, size } = file
+				const { filename, mimetype, size } = file
 				infoOfFiles.push({
 					url: `/uploads/${filename}`,
 					filename,
@@ -153,14 +156,14 @@ class NewsController {
 				})
 			})
 
-			value.images = infoOfFiles
+			req.body.images = infoOfFiles
 		}
 
 		if (req.user.role === 'ADMIN') {
 			const news = await newsModel.findByIdAndUpdate(
 				{ _id: id },
 				{
-					...value,
+					...req.body,
 					author: req.user.userId,
 				},
 			)
@@ -171,7 +174,7 @@ class NewsController {
 		existingNews = await newsModel.findByIdAndUpdate(
 			{ _id: id },
 			{
-				...value,
+				...req.body,
 				status: 'PENDING',
 				author: req.user.userId,
 			},

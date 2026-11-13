@@ -26,6 +26,7 @@ router.patch(
 	'/:id',
 	authenticateToken,
 	isOwnerOrAdmin,
+	uploadMiddleware,
 	validateMiddleware.checkUpdatingNewsSchema,
 	newsController.editNews,
 )
