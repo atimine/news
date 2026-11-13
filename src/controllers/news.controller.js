@@ -1,7 +1,10 @@
 const { customAlphabet } = require('nanoid')
 const newsModel = require('../models/news.model')
 const slugify = require('slugify')
-const creatingNewsSchema = require('../validators/body.validator')
+const categoriesModel = require('../models/categories.model')
+const tagsModel = require('../models/tags.model')
+const fs = require('fs')
+const path = require('path')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -12,25 +15,45 @@ class NewsController {
 
 	async searchNews(req, res) {
 		const { q, category, tag, sort, page, limit } = req.query
+
+		const existingCategory = await categoriesModel.findOne({
+			name: { $regex: category, $options: 'i' },
+		}) // suppose you will be recieved exact category name!!
+
+		if (!existingCategory)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		const existingTags = await tagsModel.findOne({
+			name: { $regex: tag, $options: 'i' },
+		})
+
 		const results = await newsModel
 			.find({
 				$text: {
 					$search: q,
 				},
 				status: 'PUBLISHED',
+				category: existingCategory.id,
+				tags: existingTags.id,
 			})
 			.limit(limit || 10)
 			.sort({ createdAt: sort == 'newest' ? -1 : 1 })
 			.skip(page || 1)
+			.populate(['category', 'tags'])
+			.populate('author', 'name')
 
-		res.status(200).json({ success: true, data: results })
+		res
+			.status(200)
+			.json({ success: true, data: results, meta: { total: results.length } })
 	}
 
 	async getMyNews(req, res) {
 		const id = req.user.userId
-		const newsOfUser = await newsModel.find({
-			author: id,
-		})
+		const newsOfUser = await newsModel
+			.find({
+				author: id,
+			})
+			.populate(['category', 'tags'])
 
 		res.status(200).json({ success: true, data: newsOfUser })
 	}
@@ -55,11 +78,10 @@ class NewsController {
 
 	async createNews(req, res) {
 		// check tags and categories existing in the db!!!
-		const { error, value } = creatingNewsSchema.validate({ ...req.body })
 		let infoOfFiles = []
 
 		req.files.forEach(file => {
-			const { path, filename, mimetype, size } = file
+			const { filename, mimetype, size } = file
 			infoOfFiles.push({
 				url: `/uploads/${filename}`,
 				filename,
@@ -68,21 +90,7 @@ class NewsController {
 			})
 		})
 
-		if (error) {
-			return res.status(400).json({
-				success: false,
-				message: error.message,
-				errors: [
-					{
-						fields: { ...req.body },
-						message: error.message,
-					},
-				],
-			})
-		}
-
-		let slug = slugify(value.title).toLowerCase()
-
+		let slug = slugify(req.body.title).toLowerCase()
 		let result = await newsModel.find({ slug })
 
 		if (result.length) {
@@ -91,7 +99,7 @@ class NewsController {
 
 		if (req.user.role === 'ADMIN') {
 			const news = await newsModel.create({
-				...value,
+				...req.body,
 				slug,
 				images: infoOfFiles,
 				status: 'PUBLISHED',
@@ -102,13 +110,13 @@ class NewsController {
 		}
 
 		const news = await newsModel.create({
-			...value,
+			...req.body,
 			slug,
 			images: infoOfFiles,
 			author: req.user.userId,
 		})
 
-		res.status(201).json({ success: true, data: value })
+		res.status(201).json({ success: true, data: news })
 	}
 
 	async editNews(req, res) {
@@ -175,6 +183,23 @@ class NewsController {
 	async deleteNews(req, res) {
 		const id = req.params.id
 		const existingNews = await newsModel.findByIdAndDelete(id)
+
+		if (!existingNews)
+			return res.status(404).json({ success: false, message: 'News Not Found' })
+
+		existingNews.images.forEach(image => {
+			const url = path.join(__dirname, '../', '../', image.url)
+			const existingFile = fs.existsSync(url)
+
+			if (existingFile) {
+				fs.rm(url, err => {
+					if (err) {
+						throw new Error(err)
+					}
+				})
+			}
+		})
+
 		res.status(200).json({ success: true, data: existingNews })
 	}
 }
