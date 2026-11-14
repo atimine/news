@@ -11,7 +11,7 @@ const updatingNewsSchema = Joi.object({
 		.required()
 		.error(new Error('Description Is Reqired')),
 	images: Joi.array().max(10),
-	category: Joi.string(),
+	category: Joi.string().required(),
 	tags: Joi.array()
 		.items(Joi.string())
 		.max(10)
