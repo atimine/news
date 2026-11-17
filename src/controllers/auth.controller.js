@@ -34,7 +34,13 @@ class AuthController {
 			maxAge: 900000,
 		})
 
-		res.status(201).json({ success: true, data: registeredUser })
+		res
+			.status(201)
+			.json({
+				success: true,
+				data: registeredUser,
+				token: req.cookies.jwt_refresh_token,
+			})
 	}
 
 	async login(req, res) {
@@ -60,9 +66,11 @@ class AuthController {
 			maxAge: 6.048e8,
 		})
 
-		return res
-			.status(200)
-			.json({ success: true, message: 'You Logged In Successfullly' })
+		return res.status(200).json({
+			success: true,
+			message: 'You Logged In Successfullly',
+			token: req.cookies.jwt_refresh_token,
+		})
 	}
 
 	logout(req, res) {

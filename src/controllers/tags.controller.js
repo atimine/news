@@ -8,6 +8,12 @@ class TagsController {
 	}
 
 	async getOneTag(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const tag = await tagsModel.findOne({ _id: req.params.id })
 
 		if (!tag)

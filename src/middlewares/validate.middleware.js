@@ -1,62 +1,31 @@
-const changingPasswordSchema = require('../validators/changingPassword.validator')
-const creatingNewsSchema = require('../validators/creatingNews.validator')
-const loginSchema = require('../validators/login.validator')
-const registerSchema = require('../validators/register.validator')
-const updateProfileSchema = require('../validators/updateProfile.validator')
-class ValidateMiddleware {
-	checkRegister(req, res, next) {
-		const { error } = registerSchema.validate({ ...req.body })
+const path = require('path')
+const fs = require('fs')
 
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
+function validateSchema(req, res, next, schema) {
+	const { error } = schema.validate({ ...req.body }, { abortEarly: false })
 
-		next()
+	if (error) {
+		if (req.files) {
+			req.files.forEach(image => {
+				const url = path.join(__dirname, '../', '../uploads', image.filename)
+				const existingFile = fs.existsSync(url)
+
+				if (existingFile) {
+					fs.rm(url, err => {
+						if (err) {
+							throw new Error(err)
+						}
+					})
+				}
+			})
+		}
+		return res.status(400).json({ success: false, message: error.message })
 	}
-
-	checkLogin(req, res, next) {
-		const { error } = loginSchema.validate({ ...req.body })
-
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
-
-		next()
-	}
-
-	checkUpdateProfile(req, res, next) {
-		const { error } = updateProfileSchema.validate({ ...req.body })
-
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
-
-		next()
-	}
-
-	checkChangingPassword(req, res, next) {
-		const { error } = changingPasswordSchema.validate({ ...req.body })
-
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
-
-		next()
-	}
-
-	checkCreatingNewsSchema(req, res, next) {
-		const { error } = creatingNewsSchema.validate({ ...req.body })
-
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
-
-		next()
-	}
-
-	checkUpdatingNewsSchema(req, res, next) {
-		const { error } = creatingNewsSchema.validate({ ...req.body })
-
-		if (error)
-			return res.status(400).json({ success: false, message: error.message })
-
-		next()
-	}
+	next()
 }
 
-module.exports = new ValidateMiddleware()
+function validate(schema) {
+	return (req, res, next) => validateSchema(req, res, next, schema)
+}
+
+module.exports = validate

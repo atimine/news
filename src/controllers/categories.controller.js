@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const categoriesModel = require('../models/categories.model')
 const newsModel = require('../models/news.model')
 
@@ -8,7 +9,15 @@ class CategoriesController {
 	}
 
 	async getOneCategory(req, res) {
-		const category = await categoriesModel.findOne({ _id: req.params.id })
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
+		const category = await categoriesModel
+			.findOne({ _id: req.params.id })
+			.populate('news_category')
 
 		if (!category)
 			return res

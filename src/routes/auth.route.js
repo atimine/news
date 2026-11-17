@@ -2,7 +2,15 @@ const express = require('express')
 const authController = require('../controllers/auth.controller')
 const authenticateToken = require('../middlewares/authenticate.middleware')
 const checkBlocked = require('../middlewares/checkBlocked.middleware')
-const validateMiddleware = require('../middlewares/validate.middleware')
+const validateSchema = require('../middlewares/validate.middleware')
+const validate = require('../middlewares/validate.middleware')
+
+const updateProfileSchema = require('../validators/updateProfile.validator')
+const registerSchema = require('../validators/register.validator')
+const loginSchema = require('../validators/login.validator')
+const changingPasswordSchema = require('../validators/changingPassword.validator')
+const rateLimiter = require('../middlewares/rateLimiter.middleware')
+
 const router = express.Router()
 
 // GET REQUESTS
@@ -11,12 +19,14 @@ router.get('/me', authenticateToken, authController.getCurrentUser)
 // POST REQUESTS
 router.post(
 	'/register',
-	validateMiddleware.checkRegister,
+	rateLimiter,
+	validateSchema(registerSchema),
 	authController.register,
 )
 router.post(
 	'/login',
-	validateMiddleware.checkLogin,
+	rateLimiter,
+	validate(loginSchema),
 	checkBlocked,
 	authController.login,
 )
@@ -26,13 +36,13 @@ router.post('/refresh', authController.refreshAccessToken)
 // PATCH REQUESTS
 router.patch(
 	'/me',
-	validateMiddleware.checkUpdateProfile,
+	validate(updateProfileSchema),
 	authenticateToken,
 	authController.editProfile,
 )
 router.patch(
 	'/change-password',
-	validateMiddleware.checkChangingPassword,
+	validate(changingPasswordSchema),
 	authenticateToken,
 	authController.changePassword,
 )

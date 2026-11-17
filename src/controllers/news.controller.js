@@ -94,8 +94,13 @@ class NewsController {
 	}
 
 	async createNews(req, res) {
-		// check tags and categories existing in the db!!!
 		let infoOfFiles = []
+
+		if (req.notAllowedFiles?.length || false)
+			return res.status(400).json({
+				success: false,
+				message: 'Only these type of files are supported:  png, jpeg, webp',
+			})
 
 		req.files.forEach(file => {
 			const { filename, mimetype, size } = file
@@ -137,6 +142,12 @@ class NewsController {
 	}
 
 	async editNews(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		let infoOfFiles = []
 
@@ -184,6 +195,12 @@ class NewsController {
 	}
 
 	async deleteNews(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		const existingNews = await newsModel.findByIdAndDelete(id)
 

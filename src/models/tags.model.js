@@ -10,6 +10,7 @@ const Tags = new Schema({
 		maxLength: 30,
 	},
 	slug: { type: String, unique: true },
+	news_tags: { type: mongoose.Schema.Types.ObjectId, ref: 'News' },
 })
 
 module.exports = new mongoose.model('Tags', Tags)

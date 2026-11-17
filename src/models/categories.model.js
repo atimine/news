@@ -9,6 +9,7 @@ const Categories = new mongoose.Schema(
 			minLength: 2,
 			maxLength: 50,
 		},
+		news_category: { type: mongoose.Schema.Types.ObjectId, ref: 'News' },
 		slug: { type: String, unique: true },
 		description: { type: String, maxLength: 300 },
 	},

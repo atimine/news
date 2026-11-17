@@ -32,6 +32,12 @@ class AdminController {
 	}
 
 	async approveNews(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 
 		const approvedNews = await newsModel.findByIdAndUpdate(
@@ -49,6 +55,12 @@ class AdminController {
 	}
 
 	async rejectNews(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		const { rejectReason } = req.body
 
@@ -75,6 +87,12 @@ class AdminController {
 	}
 
 	async renderUsersNews(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		const news = await newsModel.find({ author: id })
 
@@ -85,6 +103,12 @@ class AdminController {
 	}
 
 	async blockUser(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const { blockReason } = req.body
 		const user = await usersModel.findById({ _id: req.params.id })
 
@@ -102,6 +126,12 @@ class AdminController {
 	}
 
 	async unblockUser(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const user = await usersModel.findById({ _id: req.params.id })
 
 		if (!user)
@@ -119,7 +149,12 @@ class AdminController {
 		const { name } = req.body
 		let slug = slugify(name).toLowerCase()
 
-		let result = await newsModel.find({ slug })
+		let result = await categoriesModel.findOne({ slug })
+
+		if (result)
+			return res
+				.status(409)
+				.json({ success: false, message: 'Category Already Available' })
 
 		if (result.length) {
 			slug += `-${nanoid()}`
@@ -133,6 +168,12 @@ class AdminController {
 	}
 
 	async updateCategory(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		const { name } = req.body
 
@@ -149,6 +190,12 @@ class AdminController {
 	}
 
 	async deleteCategory(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 
 		// const existingCategory = await newsModel.findOne({ categry: id }) //objectid check in mongodb
@@ -165,7 +212,7 @@ class AdminController {
 				.status(404)
 				.json({ success: false, message: 'Category Not Found' })
 
-		res.status(204).json({
+		res.status(200).json({
 			success: true,
 			message: 'Content Was Deleted Succesfully',
 		})
@@ -173,7 +220,7 @@ class AdminController {
 
 	async createTag(req, res) {
 		const { name } = req.body
-		const slug = slugify(name).toLowerCase() // optimize the createing slug (check tags if already exist create different one)
+		const slug = slugify(name).toLowerCase()
 
 		let result = await tagsModel.findOne({ name })
 
@@ -191,6 +238,12 @@ class AdminController {
 	}
 
 	async updateTag(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 		const { name } = req.body
 
@@ -206,6 +259,12 @@ class AdminController {
 	}
 
 	async deleteTag(req, res) {
+		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Given ID is not in right format' })
+		}
+
 		const id = req.params.id
 
 		const deletedTag = await tagsModel.findByIdAndDelete(id)
@@ -215,7 +274,7 @@ class AdminController {
 
 		await newsModel.updateMany({ tags: id }, { $pull: { tags: id } })
 
-		res.status(204).json({
+		res.status(200).json({
 			success: true,
 			message: 'Content Was Deleted Succesfully',
 		})

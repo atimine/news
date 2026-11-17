@@ -3,7 +3,9 @@ const newsController = require('../controllers/news.controller')
 const authenticateToken = require('../middlewares/authenticate.middleware')
 const isOwnerOrAdmin = require('../middlewares/isOwnerOrAdmin.middleware')
 const uploadMiddleware = require('../middlewares/upload.middleware')
-const validateMiddleware = require('../middlewares/validate.middleware')
+const validate = require('../middlewares/validate.middleware')
+const creatingNewsSchema = require('../validators/creatingNews.validator')
+const updateNewsSchema = require('../validators/updatingNews.validator')
 const router = express.Router()
 
 // GET REQUESTS
@@ -17,7 +19,7 @@ router.post(
 	'/',
 	authenticateToken,
 	uploadMiddleware,
-	validateMiddleware.checkCreatingNewsSchema,
+	validate(creatingNewsSchema),
 	newsController.createNews,
 )
 
@@ -27,7 +29,7 @@ router.patch(
 	authenticateToken,
 	isOwnerOrAdmin,
 	uploadMiddleware,
-	validateMiddleware.checkUpdatingNewsSchema,
+	validate(updateNewsSchema),
 	newsController.editNews,
 )
 
