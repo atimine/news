@@ -3,8 +3,9 @@ const newsModel = require('../models/news.model')
 const slugify = require('slugify')
 const categoriesModel = require('../models/categories.model')
 const tagsModel = require('../models/tags.model')
-const fs = require('fs')
+const fs = require('fs/promises')
 const path = require('path')
+const { fileTypeFromFile, fileTypeFromBuffer } = require('file-type')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -95,12 +96,40 @@ class NewsController {
 
 	async createNews(req, res) {
 		let infoOfFiles = []
+		const allowedFileTypes = ['png', 'jpeg', 'jpg', 'webp']
 
-		if (req.notAllowedFiles?.length || false)
+		if (req.files?.length || false) {
+			req.files.forEach(async image => {
+				const url = path.join(__dirname, '../', '../uploads', image.filename)
+				const buffer = await fs.readFile(url)
+				const type = await fileTypeFromBuffer(buffer) // watch out there! fileTypeFromBuffer may return undefined and there will be an error !
+
+				if (!allowedFileTypes.includes(type.ext)) {
+					await fs.rm(url)
+				}
+			})
+
+			return res.status(400).json({
+				success: false,
+				message: `Some of your uploaded files are invalid. Please provide valid ones`,
+			})
+		}
+
+		if (req.notAllowedFiles?.length || false) {
+			req.files.forEach(async image => {
+				const url = path.join(__dirname, '../', '../uploads', image.filename)
+				const existingFile = fs.access(url)
+
+				if (existingFile) {
+					await fs.rm(url)
+				}
+			})
+
 			return res.status(400).json({
 				success: false,
 				message: 'Only these type of files are supported:  png, jpeg, webp',
 			})
+		}
 
 		req.files.forEach(file => {
 			const { filename, mimetype, size } = file
@@ -138,7 +167,7 @@ class NewsController {
 			author: req.user.userId,
 		})
 
-		res.status(201).json({ success: true, data: news })
+		res.status(201).json({ success: true, data: 'news' })
 	}
 
 	async editNews(req, res) {
@@ -209,14 +238,10 @@ class NewsController {
 
 		existingNews.images.forEach(image => {
 			const url = path.join(__dirname, '../', '../', image.url)
-			const existingFile = fs.existsSync(url)
+			const existingFile = fs.access(url)
 
 			if (existingFile) {
-				fs.rm(url, err => {
-					if (err) {
-						throw new Error(err)
-					}
-				})
+				fs.rm(url)
 			}
 		})
 

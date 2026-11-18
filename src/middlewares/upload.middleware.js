@@ -1,7 +1,6 @@
 const multer = require('multer')
 const crypto = require('crypto')
 const path = require('path')
-const { fileTypeFromFile } = require('file-type')
 
 const { customAlphabet } = require('nanoid')
 const nanoid = customAlphabet('1234567890abcdef', 5)
