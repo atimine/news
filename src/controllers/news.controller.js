@@ -6,6 +6,7 @@ const tagsModel = require('../models/tags.model')
 const fs = require('fs/promises')
 const path = require('path')
 const { fileTypeFromFile, fileTypeFromBuffer } = require('file-type')
+const { default: mongoose } = require('mongoose')
 
 const nanoid = customAlphabet('1234567890abcdef', 5)
 class NewsController {
@@ -34,16 +35,16 @@ class NewsController {
 	async searchNews(req, res) {
 		const { q, category, tag, sort, page, limit } = req.query
 
-		const existingCategory = await categoriesModel.findOne({
-			name: { $regex: category, $options: 'i' },
-		}) // suppose you will be recieved exact category name!!
+		// const existingCategory = await categoriesModel.findOne({
+		// 	name: { $regex: category, $options: 'i' },
+		// }) // suppose you will be recieved exact category name!!
 
-		if (!existingCategory)
-			return res.status(404).json({ success: false, message: 'News Not Found' })
+		// if (!existingCategory)
+		// 	return res.status(404).json({ success: false, message: 'News Not Found' })
 
-		const existingTags = await tagsModel.findOne({
-			name: { $regex: tag, $options: 'i' },
-		})
+		// const existingTags = await tagsModel.findOne({
+		// 	name: { $regex: tag, $options: 'i' },
+		// })
 
 		const results = await newsModel
 			.find({
@@ -51,8 +52,8 @@ class NewsController {
 					$search: q,
 				},
 				status: 'PUBLISHED',
-				category: existingCategory.id,
-				tags: existingTags.id,
+				// category: existingCategory.id,
+				// tags: existingTags.id,
 			})
 			.limit(limit || 10)
 			.sort({ createdAt: sort == 'newest' ? -1 : 1 })
@@ -107,11 +108,6 @@ class NewsController {
 				if (!allowedFileTypes.includes(type.ext)) {
 					await fs.rm(url)
 				}
-			})
-
-			return res.status(400).json({
-				success: false,
-				message: `Some of your uploaded files are invalid. Please provide valid ones`,
 			})
 		}
 
@@ -171,6 +167,7 @@ class NewsController {
 	}
 
 	async editNews(req, res) {
+		//  response with error when user uploads invalid file or edited file
 		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
 			return res
 				.status(400)

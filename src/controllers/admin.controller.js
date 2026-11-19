@@ -3,6 +3,7 @@ const newsModel = require('../models/news.model')
 const tagsModel = require('../models/tags.model')
 const slugify = require('slugify')
 const usersModel = require('../models/users.model')
+const { mongoose } = require('mongoose')
 class AdminController {
 	async renderStatistics(req, res) {
 		const users = await usersModel.countDocuments({})
@@ -94,12 +95,48 @@ class AdminController {
 		}
 
 		const id = req.params.id
-		const news = await newsModel.find({ author: id })
+		let limit = 10
+
+		if (!Number.isNaN(Number.parseInt(req.query.limit))) {
+			limit = +req.query.limit
+		}
+
+		const news = await newsModel
+			.aggregate()
+			.match({ author: new mongoose.Types.ObjectId(id) })
+			.limit(limit)
+			.lookup({
+				from: 'categories',
+				localField: 'category',
+				foreignField: '_id',
+				as: 'category',
+			})
+			.lookup({
+				from: 'users',
+				localField: 'author',
+				foreignField: '_id',
+				as: 'author',
+				pipeline: [
+					{
+						$project: { name: 1 },
+					},
+				],
+			})
+			.lookup({
+				from: 'tags',
+				localField: 'tags',
+				foreignField: '_id',
+				as: 'tags',
+			})
 
 		if (!news.length)
 			return res.status(404).json({ success: false, message: 'News Not Found' })
 
-		res.status(200).json({ success: true, data: news })
+		res.status(200).json({
+			success: true,
+			data: news,
+			meta: { limit: +limit, total: news.length },
+		})
 	}
 
 	async blockUser(req, res) {
@@ -198,19 +235,21 @@ class AdminController {
 
 		const id = req.params.id
 
-		// const existingCategory = await newsModel.findOne({ categry: id }) //objectid check in mongodb
+		const existingCategory = await categoriesModel.findOne({ _id: id })
 
-		// if (existingCategory.id === id)
-		// 	return res
-		// 		.status(409)
-		// 		.json({ success: false, message: 'This category cannot be deleted' })
+		if (!existingCategory)
+			return res.status(404).json({ success: false, message: 'Not Found' })
 
-		const deletedCategory = await categoriesModel.findByIdAndDelete(id)
+		const existingCategoryOnNews = await newsModel.findOne({ category: id })
 
-		if (!deletedCategory)
+		console.log(existingCategoryOnNews)
+
+		if (existingCategoryOnNews.category.toString() === id)
 			return res
-				.status(404)
-				.json({ success: false, message: 'Category Not Found' })
+				.status(409)
+				.json({ success: false, message: 'This category cannot be deleted' })
+
+		await categoriesModel.findByIdAndDelete(id)
 
 		res.status(200).json({
 			success: true,

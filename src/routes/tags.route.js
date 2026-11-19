@@ -4,7 +4,7 @@ const isAdmin = require('../middlewares/isAdmin.middeware')
 const router = express.Router()
 
 // GET REQUEST
-router.get('/', isAdmin, tagsController.renderTags)
+router.get('/', tagsController.renderTags)
 router.get('/:id', tagsController.getOneTag)
 
 module.exports = router

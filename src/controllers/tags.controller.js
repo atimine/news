@@ -1,9 +1,9 @@
-const newsModel = require('../models/news.model')
+const { mongoose } = require('mongoose')
 const tagsModel = require('../models/tags.model')
 
 class TagsController {
 	async renderTags(req, res) {
-		const tags = await tagsModel.find({})
+		const tags = await tagsModel.find()
 		res.status(200).json({ success: true, data: tags })
 	}
 
@@ -14,17 +14,14 @@ class TagsController {
 				.json({ success: false, message: 'Given ID is not in right format' })
 		}
 
-		const tag = await tagsModel.findOne({ _id: req.params.id })
+		const tag = await tagsModel
+			.findOne({ _id: req.params.id })
+			.populate('news_tags')
 
 		if (!tag)
 			return res.status(404).json({ success: false, message: 'Tag Not Found' })
 
-		const ralatedNews = await newsModel
-			.find({ tags: tag._id })
-			.populate(['category', 'tags'])
-			.populate('author', 'name')
-
-		res.status(200).json({ success: true, data: { tag, news: ralatedNews } })
+		res.status(200).json({ success: true, data: tag })
 	}
 }
 

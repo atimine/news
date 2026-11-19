@@ -17,21 +17,14 @@ class CategoriesController {
 
 		const category = await categoriesModel
 			.findOne({ _id: req.params.id })
-			.populate('news_category')
+			.populate('news')
 
 		if (!category)
 			return res
 				.status(404)
 				.json({ success: false, message: 'Category Not Found' })
 
-		const ralatedNews = await newsModel
-			.find({ category: category._id })
-			.populate('tags')
-			.populate('author', 'name')
-
-		res
-			.status(200)
-			.json({ success: true, data: { category, news: ralatedNews } })
+		res.status(200).json({ success: true, data: category })
 	}
 }
 
