@@ -48,9 +48,4 @@ const News = new Schema(
 	{ timestamps: true, autoSearchIndex: true },
 )
 
-News.index({
-	title: 'text',
-	content: 'text',
-})
-
 module.exports = new mongoose.model('News', News)

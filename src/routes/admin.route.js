@@ -7,12 +7,16 @@ const tagSchema = require('../validators/tag.validator')
 const validate = require('../middlewares/validate.middleware')
 const rejectNewsSchema = require('../validators/rejectNews.validator')
 const blockUserSchema = require('../validators/blockUser.validator')
+const tagsController = require('../controllers/tags.controller')
+const categoriesController = require('../controllers/categories.controller')
 
 // GET REQUESTS
-router.get('/stats', adminController.renderStatistics)
-router.get('/news', adminController.renderNews)
-router.get('/users', adminController.renderUsersList)
-router.get('/users/:id/news', adminController.renderUsersNews)
+router.get('/stats', adminController.getStatistics)
+router.get('/news', adminController.getNews)
+router.get('/users', adminController.getUsersList)
+router.get('/users/:id/news', adminController.getUsersNews)
+router.get('/tags', tagsController.getTags)
+router.get('/categories', categoriesController.getCategories)
 
 // POST REQUESTS
 router.post(

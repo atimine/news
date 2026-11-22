@@ -11,7 +11,7 @@ class AuthController {
 		const existUser = await usersModel.findOne({ email })
 
 		if (existUser) {
-			res.status(409).json({
+			res.status(400).json({
 				success: false,
 				message: 'Validation Error',
 				errors: [
@@ -34,13 +34,11 @@ class AuthController {
 			maxAge: 900000,
 		})
 
-		res
-			.status(201)
-			.json({
-				success: true,
-				data: registeredUser,
-				token: req.cookies.jwt_refresh_token,
-			})
+		res.status(201).json({
+			success: true,
+			data: registeredUser,
+			token,
+		})
 	}
 
 	async login(req, res) {
@@ -69,7 +67,7 @@ class AuthController {
 		return res.status(200).json({
 			success: true,
 			message: 'You Logged In Successfullly',
-			token: req.cookies.jwt_refresh_token,
+			token,
 		})
 	}
 

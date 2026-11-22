@@ -6,13 +6,14 @@ const uploadMiddleware = require('../middlewares/upload.middleware')
 const validate = require('../middlewares/validate.middleware')
 const creatingNewsSchema = require('../validators/creatingNews.validator')
 const updateNewsSchema = require('../validators/updatingNews.validator')
+const authGuest = require('../middlewares/optionalAuth.middleware')
 const router = express.Router()
 
 // GET REQUESTS
 router.get('/', newsController.renderNews)
 router.get('/search', newsController.searchNews)
 router.get('/my', authenticateToken, newsController.getMyNews)
-router.get('/:slug', newsController.getOneNews)
+router.get('/:slug', authGuest, newsController.getOneNews)
 
 // POST REQUEST
 router.post(

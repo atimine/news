@@ -5,7 +5,7 @@ const slugify = require('slugify')
 const usersModel = require('../models/users.model')
 const { mongoose } = require('mongoose')
 class AdminController {
-	async renderStatistics(req, res) {
+	async getStatistics(req, res) {
 		const users = await usersModel.countDocuments({})
 		const news = await newsModel.find({})
 
@@ -27,7 +27,7 @@ class AdminController {
 		})
 	}
 
-	async renderNews(req, res) {
+	async getNews(req, res) {
 		const news = await newsModel.find({})
 		res.json({ success: true, data: news })
 	}
@@ -52,7 +52,7 @@ class AdminController {
 				message: 'News Not Found',
 			})
 
-		res.status(200).json({ success: true, message: 'Welcome to Approve news' })
+		res.status(200).json({ success: true, message: 'News was approved!' })
 	}
 
 	async rejectNews(req, res) {
@@ -73,11 +73,11 @@ class AdminController {
 		if (!rejectedNews)
 			return res.status(404).json({ success: false, message: 'News Not Found' })
 
-		res.status(200).json({ success: true, message: 'Welcome to Rejected news' })
+		res.status(200).json({ success: true, message: 'News was rejected!' })
 	}
 
-	async renderUsersList(req, res) {
-		const users = await usersModel.find({})
+	async getUsersList(req, res) {
+		const users = await usersModel.find().select('-password')
 
 		if (!users.length)
 			return res
@@ -87,7 +87,7 @@ class AdminController {
 		res.status(200).json({ success: true, data: users })
 	}
 
-	async renderUsersNews(req, res) {
+	async getUsersNews(req, res) {
 		if (!mongoose.isObjectIdOrHexString(req.params.id)) {
 			return res
 				.status(400)
