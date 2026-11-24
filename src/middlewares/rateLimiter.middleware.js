@@ -1,17 +1,23 @@
-const { rateLimit } = require('express-rate-limit')
+const { RateLimiterMemory } = require('rate-limiter-flexible')
 
-const rateLimiter = rateLimit({
-	windowMs: 15 * 60 * 100, // 15 minutes
-	limit: 1,
-	standardHeaders: 'draft-8',
-	legacyHeaders: false,
-	ipv6Subnet: 56,
-	handler: (req, res, next) => {
-		res.status(429).json({
-			success: false,
-			message: 'You attamped too many requests. Try again after 15 minutes',
-		})
-	},
+const rateLimiter = new RateLimiterMemory({
+	keyPrefix: 'middleware',
+	points: 15,
+	duration: 60,
+	blockDuration: 900,
 })
 
-module.exports = rateLimiter
+const rateLimiterMiddleware = (req, res, next) => {
+	rateLimiter
+		.consume(req.ip)
+		.then(() => {
+			next()
+		})
+		.catch(() => {
+			res
+				.status(429)
+				.json('You attapted too many requests. Please try again after a minute')
+		})
+}
+
+module.exports = rateLimiterMiddleware

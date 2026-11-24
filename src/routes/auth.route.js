@@ -9,7 +9,7 @@ const updateProfileSchema = require('../validators/updateProfile.validator')
 const registerSchema = require('../validators/register.validator')
 const loginSchema = require('../validators/login.validator')
 const changingPasswordSchema = require('../validators/changingPassword.validator')
-const rateLimiter = require('../middlewares/rateLimiter.middleware')
+const rateLimiterMiddleware = require('../middlewares/rateLimiter.middleware')
 
 const router = express.Router()
 
@@ -19,13 +19,13 @@ router.get('/me', authenticateToken, authController.getCurrentUser)
 // POST REQUESTS
 router.post(
 	'/register',
-	rateLimiter,
+	rateLimiterMiddleware,
 	validateSchema(registerSchema),
 	authController.register,
 )
 router.post(
 	'/login',
-	rateLimiter,
+	rateLimiterMiddleware,
 	validate(loginSchema),
 	checkBlocked,
 	authController.login,

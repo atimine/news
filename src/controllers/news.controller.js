@@ -116,90 +116,92 @@ class NewsController {
 
 	async createNews(req, res) {
 		let infoOfFiles = []
-		// const allowedFileTypes = ['png', 'jpeg', 'jpg', 'webp']
-		// const category = await categoriesModel.findOne({ _id: req.body.category })
+		const allowedFileTypes = ['png', 'jpeg', 'jpg', 'webp']
+		const category = await categoriesModel.findOne({ _id: req.body.category })
 		let tags = await tagsModel.find().select('_id')
 		const isTagExist = []
+		const checkedTags = []
 
-		console.log(...tags)
-
-		req.body.tags.forEach(tag => {
-			isTagExist.push(tags.includes(tag))
+		tags.forEach(tag => {
+			const { _id } = tag
+			isTagExist.push(_id.toString())
 		})
 
-		console.log(isTagExist.find(false))
+		req.body.tags.forEach(tag => {
+			checkedTags.push(isTagExist.includes(tag))
+		})
 
-		// if (!category && !isTagExist.find(false)) {
-		// 	return res
-		// 		.status(404)
-		// 		.json({ success: false, message: 'Category or Tag Not Found' })
-		// }
+		if (!category || checkedTags.includes(false)) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'Category or Tag Not Found' })
+		}
 
-		// if (req.files?.length || false) {
-		// 	req.files.forEach(async image => {
-		// 		const url = path.join(__dirname, '../', '../uploads', image.filename)
-		// 		const buffer = await fs.readFile(url)
-		// 		const type = await fileTypeFromBuffer(buffer) // watch out there! fileTypeFromBuffer may return undefined and there will be an error !
+		if (req.files?.length || false) {
+			req.files.forEach(async image => {
+				const url = path.join(__dirname, '../', '../uploads', image.filename)
+				const buffer = await fs.readFile(url)
+				const type = await fileTypeFromBuffer(buffer) // watch out there! fileTypeFromBuffer may return undefined and there will be an error !
 
-		// 		if (!allowedFileTypes.includes(type.ext)) {
-		// 			await fs.rm(url)
-		// 		}
-		// 	})
-		// }
+				if (!allowedFileTypes.includes(type.ext)) {
+					await fs.rm(url)
+				}
+			})
+		}
 
-		// if (req.notAllowedFiles?.length || false) {
-		// 	req.files.forEach(async image => {
-		// 		const url = path.join(__dirname, '../', '../uploads', image.filename)
-		// 		const existingFile = fs.access(url)
+		if (req.notAllowedFiles?.length || false) {
+			req.files.forEach(async image => {
+				const url = path.join(__dirname, '../', '../uploads', image.filename)
+				const existingFile = fs.access(url)
 
-		// 		if (existingFile) {
-		// 			await fs.rm(url)
-		// 		}
-		// 	})
+				if (existingFile) {
+					await fs.rm(url)
+				}
+			})
 
-		// 	return res.status(400).json({
-		// 		success: false,
-		// 		message: 'Only these type of files are supported:  png, jpeg, webp',
-		// 	})
-		// }
+			return res.status(400).json({
+				success: false,
+				message: 'Only these type of files are supported:  png, jpeg, webp',
+			})
+		}
 
-		// req.files.forEach(file => {
-		// 	const { filename, mimetype, size } = file
-		// 	infoOfFiles.push({
-		// 		url: `/uploads/${filename}`,
-		// 		filename,
-		// 		mimetype,
-		// 		size,
-		// 	})
-		// })
+		req.files.forEach(file => {
+			const { filename, mimetype, size } = file
+			infoOfFiles.push({
+				url: `/uploads/${filename}`,
+				filename,
+				mimetype,
+				size,
+			})
+		})
 
-		// let slug = slugify(req.body.title).toLowerCase()
-		// let result = await newsModel.find({ slug })
+		let slug = slugify(req.body.title).toLowerCase()
+		let result = await newsModel.find({ slug })
 
-		// if (result.length) {
-		// 	slug += `-${nanoid()}`
-		// }
+		if (result.length) {
+			slug += `-${nanoid()}`
+		}
 
-		// if (req.user.role === 'ADMIN') {
-		// 	const news = await newsModel.create({
-		// 		...req.body,
-		// 		slug,
-		// 		images: infoOfFiles,
-		// 		status: 'PUBLISHED',
-		// 		author: req.user.userId,
-		// 	})
+		if (req.user.role === 'ADMIN') {
+			const news = await newsModel.create({
+				...req.body,
+				slug,
+				images: infoOfFiles,
+				status: 'PUBLISHED',
+				author: req.user.userId,
+			})
 
-		// 	return res.status(201).json({ success: true, data: news })
-		// }
+			return res.status(201).json({ success: true, data: news })
+		}
 
-		// const news = await newsModel.create({
-		// 	...req.body,
-		// 	slug,
-		// 	images: infoOfFiles,
-		// 	author: req.user.userId,
-		// })
+		const news = await newsModel.create({
+			...req.body,
+			slug,
+			images: infoOfFiles,
+			author: req.user.userId,
+		})
 
-		res.status(201).json({ success: true, data: 'news' })
+		res.status(201).json({ success: true, data: news })
 	}
 
 	async editNews(req, res) {
@@ -212,10 +214,21 @@ class NewsController {
 				.json({ success: false, message: 'Given ID is not in right format' })
 		}
 
-		const category = await categoriesModel.findOne()
-		const tag = await tagsModel.findOne()
+		const category = await categoriesModel.findOne({ _id: req.body.category })
+		let tags = await tagsModel.find().select('_id')
+		const isTagExist = []
+		const checkedTags = []
 
-		if (category && tag) {
+		tags.forEach(tag => {
+			const { _id } = tag
+			isTagExist.push(_id.toString())
+		})
+
+		req.body.tags.forEach(tag => {
+			checkedTags.push(isTagExist.includes(tag))
+		})
+
+		if (!category || checkedTags.includes(false)) {
 			return res
 				.status(404)
 				.json({ success: false, message: 'Category or Tag Not Found' })

@@ -26,7 +26,6 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // ROUTES
 app.get('/', (req, res) => {
-	console.log(req.socket)
 	res.status(200)
 	res.json({ message: 'Welcome to News API' })
 })
